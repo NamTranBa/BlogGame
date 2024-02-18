@@ -13,9 +13,9 @@ public partial class User
 
     public string Email { get; set; } = null!;
 
-    public DateTime CreateDate { get; set; }
+    public DateTime CreateDate { get; set; } = DateTime.Now;
 
-    public DateTime? LastLogin { get; set; }
+    public DateTime? LastLogin { get; set; } ;
 
     public bool IsBanned { get; set; }
 

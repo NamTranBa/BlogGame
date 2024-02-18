@@ -37,7 +37,24 @@ namespace DataAccess.DAL
 
             }
         }
-
+        public async Task<IEnumerable<Game>> Search(string name)
+        {
+            try
+            {
+                var game = await _context.Games.Where(idg => idg.Title == name).ToListAsync();
+                if (game == null)
+                {
+                    _logger.LogInformation($"Game with title {name} not found.");
+                    return null;
+                }
+                return game;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
         public async Task<Game> Get(int id)
         {
             try
@@ -98,6 +115,32 @@ namespace DataAccess.DAL
 
                 await transaction.RollbackAsync();
                 _logger.LogError(ex, "An error occurred while updating the game");
+                throw;
+            }
+        }
+
+        public async Task<Game> RemoveGame (int id)
+        {
+            
+            var game = await _context.Games.FindAsync(id);
+            if (game == null)
+            {
+                _logger.LogInformation($"Game with id {id} not found.");
+                return null;
+            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.Remove(game);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return game;
+            }
+            catch (Exception ex)
+            {
+
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "An error occurred while remove the game");
                 throw;
             }
         }
