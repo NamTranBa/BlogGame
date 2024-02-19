@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace DataAccess.Models;
+namespace DataAccess.Model;
 
 public partial class GameBlogDbContext : DbContext
 {
@@ -24,6 +24,10 @@ public partial class GameBlogDbContext : DbContext
 
     public virtual DbSet<Game> Games { get; set; }
 
+    public virtual DbSet<GameCategory> GameCategories { get; set; }
+
+    public virtual DbSet<GameTag> GameTags { get; set; }
+
     public virtual DbSet<Like> Likes { get; set; }
 
     public virtual DbSet<Rating> Ratings { get; set; }
@@ -40,6 +44,7 @@ public partial class GameBlogDbContext : DbContext
         IConfigurationRoot configuration = builder.Build();
         optionsBuilder.UseSqlServer(configuration.GetConnectionString("MyDb"));
     }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Category>(entity =>
@@ -106,44 +111,44 @@ public partial class GameBlogDbContext : DbContext
             entity.Property(e => e.Publisher).HasMaxLength(255);
             entity.Property(e => e.ReleaseDate).HasColumnType("datetime");
             entity.Property(e => e.Title).HasMaxLength(255);
+        });
 
-            entity.HasMany(d => d.Categories).WithMany(p => p.Games)
-                .UsingEntity<Dictionary<string, object>>(
-                    "GameCategory",
-                    r => r.HasOne<Category>().WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__GameCateg__Categ__534D60F1"),
-                    l => l.HasOne<Game>().WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__GameCateg__GameI__52593CB8"),
-                    j =>
-                    {
-                        j.HasKey("GameId", "CategoryId").HasName("PK__GameCate__8B28047F25393D9F");
-                        j.ToTable("GameCategories");
-                        j.IndexerProperty<int>("GameId").HasColumnName("GameID");
-                        j.IndexerProperty<int>("CategoryId").HasColumnName("CategoryID");
-                    });
+        modelBuilder.Entity<GameCategory>(entity =>
+        {
+            entity.HasKey(e => new { e.GameId, e.CategoryId }).HasName("PK__GameCate__8B28047F25393D9F");
 
-            entity.HasMany(d => d.Tags).WithMany(p => p.Games)
-                .UsingEntity<Dictionary<string, object>>(
-                    "GameTag",
-                    r => r.HasOne<Tag>().WithMany()
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__GameTags__TagID__5EBF139D"),
-                    l => l.HasOne<Game>().WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__GameTags__GameID__5DCAEF64"),
-                    j =>
-                    {
-                        j.HasKey("GameId", "TagId").HasName("PK__GameTags__FCEF58790DDF3A0B");
-                        j.ToTable("GameTags");
-                        j.IndexerProperty<int>("GameId").HasColumnName("GameID");
-                        j.IndexerProperty<int>("TagId").HasColumnName("TagID");
-                    });
+            entity.Property(e => e.GameId).HasColumnName("GameID");
+            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
+            entity.Property(e => e.ModifiedDate).HasColumnType("date");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.GameCategories)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__GameCateg__Categ__534D60F1");
+
+            entity.HasOne(d => d.Game).WithMany(p => p.GameCategories)
+                .HasForeignKey(d => d.GameId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__GameCateg__GameI__52593CB8");
+        });
+
+        modelBuilder.Entity<GameTag>(entity =>
+        {
+            entity.HasKey(e => new { e.GameId, e.TagId }).HasName("PK__GameTags__FCEF58790DDF3A0B");
+
+            entity.Property(e => e.GameId).HasColumnName("GameID");
+            entity.Property(e => e.TagId).HasColumnName("TagID");
+            entity.Property(e => e.ModifiedDate).HasColumnType("date");
+
+            entity.HasOne(d => d.Game).WithMany(p => p.GameTags)
+                .HasForeignKey(d => d.GameId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__GameTags__GameID__5DCAEF64");
+
+            entity.HasOne(d => d.Tag).WithMany(p => p.GameTags)
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__GameTags__TagID__5EBF139D");
         });
 
         modelBuilder.Entity<Like>(entity =>

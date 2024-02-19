@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DataAccess.Models;
+namespace DataAccess.Model;
 
 public partial class Category
 {
@@ -9,5 +9,5 @@ public partial class Category
 
     public string CategoryName { get; set; } = null!;
 
-    public virtual ICollection<Game> Games { get; set; } = new List<Game>();
+    public virtual ICollection<GameCategory> GameCategories { get; set; } = new List<GameCategory>();
 }

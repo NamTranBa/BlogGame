@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DataAccess.Models;
+namespace DataAccess.Model;
 
 public partial class Game
 {
@@ -21,11 +21,11 @@ public partial class Game
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
+    public virtual ICollection<GameCategory> GameCategories { get; set; } = new List<GameCategory>();
+
+    public virtual ICollection<GameTag> GameTags { get; set; } = new List<GameTag>();
+
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
     public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
-
-    public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
-
-    public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }

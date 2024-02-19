@@ -1,13 +1,7 @@
-﻿using DataAccess.Models;
+﻿using DataAccess.Model;
 using DTO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.DAL
 {
@@ -19,19 +13,20 @@ namespace DataAccess.DAL
         {
             _context = context;
             _logger = logger;
-            
+
 
         }
-        public async Task<User> Register(UserDTO user)
+        //User su dung
+        public async Task<User> Register(string username, string password, string email)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var user1 = new User
                 {
-                    Username = user.Username,
-                    PasswordHash = PasswordHasher.HashPassword(user.password), // Sử dụng phương thức đã đề cập để hash mật khẩu
-                    Email = user.Email,
+                    Username = username,
+                    PasswordHash = PasswordHasher.HashPassword(password), // Sử dụng phương thức đã đề cập để hash mật khẩu
+                    Email = email,
                     CreateDate = DateTime.Now,
                     LastLogin = null,
                     IsBanned = false
@@ -87,15 +82,15 @@ namespace DataAccess.DAL
                 user.PasswordHash = PasswordHasher.HashPassword(newPass);
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
-                return true; 
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while changing the password for user {userName}", userName);
+                _logger.LogError(ex, $"An error occurred while changing the password for user {userName}");
                 throw; // Hoặc bạn có thể quyết định trả về false tùy vào cách xử lý lỗi của bạn
             }
         }
-
+        //Quan li User
         public async Task<IEnumerable<User>> GetListUser()
         {
             var list = await _context.Users.ToListAsync();
@@ -111,5 +106,56 @@ namespace DataAccess.DAL
             }
             return user;
         }
+
+        public async Task<User> Update(int id, User userUpdate)
+        {
+            if (userUpdate == null) throw new ArgumentNullException(nameof(userUpdate));
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                _logger.LogInformation($"User with id {id} not found.");
+                return null;
+            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.Entry(user).CurrentValues.SetValues(userUpdate);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return user;
+            }
+            catch (Exception ex)
+            {
+
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "An error occurred while updating the user");
+                throw;
+            }
+        }
+        public async Task<User> Remove(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                _logger.LogInformation($"User with id {id} not found.");
+                return null;
+            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return user;
+            }
+            catch (Exception ex)
+            {
+
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "An error occurred while updating the user");
+                throw;
+            }
+        }
+
     }
 }

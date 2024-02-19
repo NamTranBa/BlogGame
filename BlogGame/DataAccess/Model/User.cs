@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DataAccess.Models;
+namespace DataAccess.Model;
 
 public partial class User
 {
@@ -13,9 +13,9 @@ public partial class User
 
     public string Email { get; set; } = null!;
 
-    public DateTime CreateDate { get; set; } = DateTime.Now;
+    public DateTime CreateDate { get; set; }
 
-    public DateTime? LastLogin { get; set; } ;
+    public DateTime? LastLogin { get; set; }
 
     public bool IsBanned { get; set; }
 

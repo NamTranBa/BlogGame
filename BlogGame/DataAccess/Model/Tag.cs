@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DataAccess.Models;
+namespace DataAccess.Model;
 
 public partial class Tag
 {
@@ -9,5 +9,5 @@ public partial class Tag
 
     public string TagName { get; set; } = null!;
 
-    public virtual ICollection<Game> Games { get; set; } = new List<Game>();
+    public virtual ICollection<GameTag> GameTags { get; set; } = new List<GameTag>();
 }

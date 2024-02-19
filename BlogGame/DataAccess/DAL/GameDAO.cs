@@ -1,4 +1,4 @@
-﻿using DataAccess.Models;
+﻿using DataAccess.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
